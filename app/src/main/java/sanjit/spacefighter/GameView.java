@@ -184,7 +184,6 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         int roll = (int) event.values[2];
-        Log.e("onSensorChanged: ", roll + "");
         player.setXSpeed(roll);
     }
 
