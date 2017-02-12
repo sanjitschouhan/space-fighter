@@ -17,19 +17,25 @@ public class Player {
     private int x;
     private int y;
     private int speed = 0;
+    private int xSpeed = 0;
     private boolean boosting;
     private int maxY;
     private int minY;
+    private int maxX;
+    private int minX;
 
     private Rect detectCollision;
 
     public Player(Context context, int screenX, int screenY) {
-        x = 75;
-        y = 50;
+        x = screenX / 2;
+        y = screenY;
         speed = 1;
+        xSpeed = 0;
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.player);
         maxY = screenY - bitmap.getHeight();
+        maxX = screenX - bitmap.getWidth();
         minY = 0;
+        minX = 0;
         boosting = false;
         detectCollision = new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
     }
@@ -47,6 +53,7 @@ public class Player {
     }
 
     public void update() {
+
         if (boosting) {
             speed += 2;
         } else {
@@ -70,6 +77,14 @@ public class Player {
             y = maxY;
         }
 
+        x -= xSpeed;
+
+        if (x < minX) {
+            x = minX;
+        }
+        if (x > maxX) {
+            x = maxX;
+        }
 
         detectCollision.left = x;
         detectCollision.top = y;
@@ -83,6 +98,10 @@ public class Player {
 
     public int getX() {
         return x;
+    }
+
+    public void setXSpeed(int roll) {
+        xSpeed = roll;
     }
 
     public int getY() {

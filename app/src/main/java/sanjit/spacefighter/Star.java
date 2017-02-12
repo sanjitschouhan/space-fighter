@@ -29,12 +29,12 @@ public class Star {
     }
 
     public void update(int playerSpeed) {
-        x -= playerSpeed;
-        x -= speed;
-        if (x < 0) {
-            x = maxX;
+        y += playerSpeed;
+        y += speed;
+        if (y > maxY) {
+            y = minY;
             Random generator = new Random();
-            y = generator.nextInt(maxY);
+            x = generator.nextInt(maxX);
             speed = generator.nextInt(15);
         }
     }

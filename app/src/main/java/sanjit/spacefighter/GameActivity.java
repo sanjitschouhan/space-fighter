@@ -18,7 +18,7 @@ public class GameActivity extends AppCompatActivity {
         Point size = new Point();
         display.getSize(size);
 
-        gameView = new GameView(this, size.x, size.y);
+        gameView = new GameView(this, size.x, size.y,getSystemService(SENSOR_SERVICE));
         setContentView(gameView);
     }
 

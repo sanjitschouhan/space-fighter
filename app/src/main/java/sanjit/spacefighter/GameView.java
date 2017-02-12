@@ -5,6 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -15,7 +20,7 @@ import java.util.ArrayList;
  * Created by sanjit on 12/2/17.
  */
 
-public class GameView extends SurfaceView implements Runnable {
+public class GameView extends SurfaceView implements Runnable, SensorEventListener {
 
     volatile boolean playing;
     private Thread gameThread = null;
@@ -32,8 +37,18 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Boom boom;
 
-    public GameView(Context context, int screenX, int screenY) {
+    private SensorManager sensorManager;
+    private Sensor sensor;
+
+    private int screenY;
+    private int score = 0;
+
+    public GameView(Context context, int screenX, int screenY, Object SystenSensorManager) {
         super(context);
+        this.screenY = screenY;
+
+        this.sensorManager = (SensorManager) SystenSensorManager;
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
         player = new Player(context, screenX, screenY);
 
@@ -51,6 +66,7 @@ public class GameView extends SurfaceView implements Runnable {
         }
 
         boom = new Boom(context);
+
     }
 
     @Override
@@ -77,11 +93,12 @@ public class GameView extends SurfaceView implements Runnable {
                 boom.setY(enemies[i].getY());
                 boom.setSpeed(enemies[i].getSpeed());
                 enemies[i].setX(-enemies[i].getBitmap().getWidth() - 200);
+                score += player.getSpeed();
             }
         }
 
-        if (boom.getX() > -300) {
-            boom.setX(boom.getX() - boom.getSpeed() - player.getSpeed());
+        if (boom.getY() < screenY) {
+            boom.setY(boom.getY() + boom.getSpeed() + player.getSpeed());
         }
     }
 
@@ -119,6 +136,9 @@ public class GameView extends SurfaceView implements Runnable {
                     paint
             );
 
+            paint.setTextSize(50);
+            canvas.drawText("Score: " + score, 10, 60, paint);
+
             surfaceHolder.unlockCanvasAndPost(canvas);
         }
     }
@@ -138,12 +158,14 @@ public class GameView extends SurfaceView implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        sensorManager.unregisterListener(this);
     }
 
     public void resume() {
         playing = true;
         gameThread = new Thread(this);
         gameThread.start();
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -157,5 +179,17 @@ public class GameView extends SurfaceView implements Runnable {
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        int roll = (int) event.values[2];
+        Log.e("onSensorChanged: ", roll + "");
+        player.setXSpeed(roll);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }

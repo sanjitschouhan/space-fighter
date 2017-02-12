@@ -35,21 +35,23 @@ public class Enemy {
 
         Random generator = new Random();
         speed = generator.nextInt(6) + 10;
-        x = screenX;
-        y = generator.nextInt(maxY) - bitmap.getHeight();
+        x = generator.nextInt(maxX) - bitmap.getHeight();
+        y = minY;
 
         detectCollision = new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
     }
 
     public void update(int playerSpeed) {
-        x -= playerSpeed;
-        x -= speed;
+        y += playerSpeed;
+        y += speed;
 
-        if (x < minX - bitmap.getWidth()) {
+        if (y > maxY + bitmap.getHeight()) {
             Random generator = new Random();
             speed = generator.nextInt(6) + 10;
-            x = maxX;
-            y = generator.nextInt(maxY) - bitmap.getHeight();
+            x = generator.nextInt(maxX) - bitmap.getHeight();
+            if (x < minX)
+                x = minX;
+            y = minY;
         }
 
         detectCollision.left = x;
