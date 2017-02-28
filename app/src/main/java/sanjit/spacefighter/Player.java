@@ -34,7 +34,7 @@ public class Player {
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.player);
         maxY = screenY - bitmap.getHeight();
         maxX = screenX - bitmap.getWidth();
-        minY = 0;
+        minY = screenY/3;
         minX = 0;
         boosting = false;
         detectCollision = new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());

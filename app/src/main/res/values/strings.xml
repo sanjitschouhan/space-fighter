@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Space Fighter</string>
+    <string name="shoot_button">Shoot Button</string>
 </resources>

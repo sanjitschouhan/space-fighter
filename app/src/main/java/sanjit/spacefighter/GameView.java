@@ -9,7 +9,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,18 +22,16 @@ import java.util.ArrayList;
 public class GameView extends SurfaceView implements Runnable, SensorEventListener {
 
     volatile boolean playing;
+    int nextFire;
     private Thread gameThread = null;
     private Player player;
-
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
-
     private Enemy[] enemies;
     private int enemyCount = 3;
-
     private ArrayList<Star> stars = new ArrayList<>();
-
+    private ArrayList<ShootFire> fires = new ArrayList<>();
     private Boom boom;
 
     private SensorManager sensorManager;
@@ -58,6 +55,12 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
         int starNums = 100;
         for (int i = 0; i < starNums; i++) {
             stars.add(new Star(screenX, screenY));
+        }
+
+        nextFire = 0;
+        int fireNums = 100;
+        for (int i = 0; i < fireNums; i++) {
+            fires.add(new ShootFire(-500, -500));
         }
 
         enemies = new Enemy[enemyCount];
@@ -88,12 +91,15 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
         for (int i = 0; i < enemyCount; i++) {
             enemies[i].update(player.getSpeed());
 
-            if (Rect.intersects(player.getDetectCollision(), enemies[i].getDetectCollision())) {
-                boom.setX(enemies[i].getX());
-                boom.setY(enemies[i].getY());
-                boom.setSpeed(enemies[i].getSpeed());
-                enemies[i].setX(-enemies[i].getBitmap().getWidth() - 200);
-                score += player.getSpeed();
+            for (ShootFire sf : fires) {
+                sf.update(player.getSpeed());
+                if (Rect.intersects(sf.getDetectCollision(), enemies[i].getDetectCollision())) {
+                    boom.setX(enemies[i].getX());
+                    boom.setY(enemies[i].getY());
+                    boom.setSpeed(enemies[i].getSpeed());
+                    enemies[i].setX(-enemies[i].getBitmap().getWidth() - 200);
+                    score += player.getSpeed();
+                }
             }
         }
 
@@ -111,6 +117,12 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
             for (Star s : stars) {
                 paint.setStrokeWidth(s.getStarWidth());
                 canvas.drawPoint(s.getX(), s.getY(), paint);
+
+            }
+            paint.setColor(Color.YELLOW);
+            for (ShootFire sf : fires) {
+                paint.setStrokeWidth(2);
+                canvas.drawLine(sf.getX(), sf.getY(), sf.getX(), sf.getY() + 10, paint);
             }
 
             canvas.drawBitmap(
@@ -190,5 +202,22 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    public void shoot() {
+        ShootFire shootFire = fires.get(nextFire);
+        nextFire = (nextFire + 1) % 100;
+        shootFire.setX(player.getX() + player.getBitmap().getWidth() / 4);
+        shootFire.setY(player.getY());
+
+        shootFire = fires.get(nextFire);
+        nextFire = (nextFire + 1) % 100;
+        shootFire.setX(player.getX() + player.getBitmap().getWidth() / 2);
+        shootFire.setY(player.getY());
+
+        shootFire = fires.get(nextFire);
+        nextFire = (nextFire + 1) % 100;
+        shootFire.setX(player.getX() + 3 * player.getBitmap().getWidth() / 4);
+        shootFire.setY(player.getY());
     }
 }
